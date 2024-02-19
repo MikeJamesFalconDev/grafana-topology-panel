@@ -1,0 +1,8 @@
+npm install
+npm run dev
+npm run server
+docker compose up
+
+
+Si corro solo npm run server ya levanta el grafana. Por ahora no logro que capture los cambios dinamicamente. Problemas de interaccion con el grafana del docker-compose de adri
+El otro tiene que estar abajo cuando corro npm run server.
