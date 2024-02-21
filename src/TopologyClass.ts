@@ -2,7 +2,7 @@ import { DataFrame } from "@grafana/data";
 import { EdgeType, NodeType } from "types";
 
 
-function getField(frame: Dataframe, name:string) {
+function getField(frame: DataFrame, name: string) {
     return frame.fields.find((field) => field.name === name)
 }
 
@@ -18,7 +18,7 @@ export class TopologyClass {
     
     private getNodes(series: DataFrame[]): NodeType[] {
       const frame = series.find((frame) => frame.name === 'nodes');
-      if (!frame || frame.fields.length == 0) {
+      if (!frame || frame.fields.length === 0) {
         return [];
       }
       const idField     =   getField(frame, 'id'); 
@@ -34,7 +34,7 @@ export class TopologyClass {
           acc.push( {
             name: idField.values[index],
             title: titleField.values[index],
-            details: detailsField.values[index],
+            details: (detailsField)? detailsField.values[index] : '',
             coordinates: {
               lat: latField.values[index],
               lng: lngField.values[index]
@@ -46,13 +46,13 @@ export class TopologyClass {
     }
   
     private findNode(name: String): NodeType | undefined {
-      return this.nodes.find((curr)=> curr.name == name);
+      return this.nodes.find((curr)=> curr.name === name);
     }
   
     private getEdges(series: DataFrame[]): EdgeType[] {
   
       const frame = series.find((frame) => frame.name === 'edges');    
-      if (!frame || frame.fields.length == 0) {
+      if (!frame || frame.fields.length === 0) {
         console.log('Edges frame not found')
         return [];
       }
@@ -72,9 +72,10 @@ export class TopologyClass {
           if (source && target) {
             acc.push(
               {
+                name: source.name+ '-' + target.name,
                 endpoints: [source.name,target.name],
                 coordinates: [source.coordinates, target.coordinates],
-                load: [ sourceLoadField.values[index], targetLoadField.values[index]]
+                load: [ (sourceLoadField)? sourceLoadField.values[index]: '', (targetLoadField)? targetLoadField.values[index]: '' ]
               }
             )
           } else {

@@ -31,7 +31,7 @@ class Link extends Component<LinkProps> {
 //    });
 //  }
 
-    getLight(props:LinkProps, position:'start'|'end'): google.maps.IconSequence {
+    getLight(props: LinkProps, position: 'start'|'end'): google.maps.IconSequence {
         const offset = ((position === 'start')? 0: 1).toString();
         const cx = 0;
         const cy =(position === 'start')?-4: 4;
@@ -101,8 +101,7 @@ class Link extends Component<LinkProps> {
                     onMouseOver = {this.handleMouseOver}
                     onMouseOut  = {this.handleMouseOut}
                     onClick     = {this.handleClick}
-            >
-            </Polyline>
+            />
         ) :
             <></>
     }

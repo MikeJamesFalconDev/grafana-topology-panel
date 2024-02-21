@@ -12,17 +12,30 @@ interface Props extends PanelProps<TopologyOptions> {}
 
 
 export const TopologyPanel: React.FC<Props> = ({ options, data, width, height }) => {
-  if (!data || !data.series.length) {
+  const { isLoaded } =  useLoadScript({
+    //googleMapsApiKey: 'AIzaSyAGmzk-ZHr54c2FAM3PWY-NVby3036C9_w',
+    googleMapsApiKey: 'AIzaSyBDaeWicvigtP9xPv919E-RNoxfvC-Hqik',
+  });
+
+  const [map, setMap] = React.useState(null)
+
+  const onLoad = React.useCallback(function callback(map) {
+    setMap(map)
+  }, [])
+
+
+  const onUnmount = React.useCallback(function callback(map) {
+    setMap(null)
+  }, [])
+
+
+if (!data || !data.series.length) {
     return (
       <div className="panel-empty">
         <p>No data found in response</p>
       </div>
     );
   }
-  const { isLoaded, loadError } =  useLoadScript({
-    googleMapsApiKey: 'AIzaSyBDaeWicvigtP9xPv919E-RNoxfvC-Hqik',
-  });
-
     const mapOptions = 
     { styles: [
         { 
@@ -47,17 +60,6 @@ export const TopologyPanel: React.FC<Props> = ({ options, data, width, height })
 //    {"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#83cead"}]},
 //    {"elementType":"labels","stylers":[{"visibility":"off"}]},
 //    {"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"weight":0.9},{"visibility":"off"}]}]
-
-    const [map, setMap] = React.useState(null)
-
-    const onLoad = React.useCallback(function callback(map) {
-      setMap(map)
-    }, [])
-
-
-    const onUnmount = React.useCallback(function callback(map) {
-      setMap(null)
-    }, [])
 
 
     return isLoaded ? (

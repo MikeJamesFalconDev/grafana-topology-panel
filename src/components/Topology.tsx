@@ -14,7 +14,7 @@ import { TopologyClass } from 'TopologyClass';
     options: TopologyOptions
   }
   
-  const Topology:React.FC<TopologyProps> = ({ series, map , options}) => {
+  const Topology: React.FC<TopologyProps> = ({ series, map , options}) => {
     const topology = new TopologyClass(series);
     if (map != null) {
       const bounds = new window.google.maps.LatLngBounds();
@@ -23,8 +23,8 @@ import { TopologyClass } from 'TopologyClass';
     }
     return (
       <>
-      { topology.nodes.map((node,index, frames)=> <Router node={node} options={options}/> ) }
-      { topology.edges.map((edge,index, frames)=> <Link link={edge} options={options} /> ) }
+      { topology.nodes.map((node)=> <Router key={node.name} node={node} options={options}/> ) }
+      { topology.edges.map((edge)=> <Link key={edge.name} link={edge} options={options} /> ) }
       </>
     )
   

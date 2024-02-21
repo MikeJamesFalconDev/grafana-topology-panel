@@ -26,6 +26,7 @@ export type NodeType = {
 }
 
 export type EdgeType = {
+  name: string,
   endpoints: String[],
   coordinates: google.maps.LatLng[],
   load: number[]
