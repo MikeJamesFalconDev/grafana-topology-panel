@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Polyline, InfoWindow } from '@react-google-maps/api';
+import { Polyline } from '@react-google-maps/api';
 import { EdgeType, TopologyOptions } from 'types';
 
 interface LinkProps {
@@ -70,21 +70,21 @@ class Link extends Component<LinkProps> {
         highlight: false        
     }
 
-    handleMouseOver = (e) => {
+    handleMouseOver = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: true,
             highlight: true
         })
     }
 
-    handleMouseOut = (e) => {
+    handleMouseOut = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: false,
             highlight: false
         })
     }
 
-    handleClick = (e) => {}
+    handleClick = (e: google.maps.MapMouseEvent) => {}
 
     render(): React.ReactNode {
         const link = this.props.link

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Marker , InfoWindow} from '@react-google-maps/api';
+import { Marker } from '@react-google-maps/api';
 import { NodeType, TopologyOptions } from 'types';
 
 const router_icon = 'https://symbols.getvecta.com/stencil_240/204_router.7b208c1133.svg'
@@ -15,20 +15,20 @@ class Router extends Component<RouterProps> {
         highlight: false        
     }
 
-    handleMouseOver = (e) => {
+    handleMouseOver = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: true,
             highlight: true        
         })
     };
 
-    handleMouseOut = (e) => {
+    handleMouseOut = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: false,
             highlight: false
         })
     };
-    handleClick = (e) => {
+    handleClick = (e: google.maps.MapMouseEvent) => {
         const url = this.props.options.nodeClickUrl.replace('{name}', this.props.node.name).replace('{title}', this.props.node.title);
         console.log(`Url ${url}`)
         const win = window.open(url, '_blank')
@@ -44,11 +44,20 @@ class Router extends Component<RouterProps> {
         }
       }
     
-    render(): React.ReactNode {
-        const { showPopup, highlight } = this.state;
+
+//     animation={(highlight)?google.maps.Animation.DROP:undefined}
+                // {showPopup?  (
+                //     <InfoWindow>
+                //         <h5>{node.details}</h5>
+                //     </InfoWindow>
+                // ): <></>}
+
+
+      render(): React.ReactNode {
+        // const { showPopup, highlight } = this.state;
         const { node, options } = this.props;
         return (
-            <Marker label={(options.showNodeTitles)? this.getTitleLabel(node.title):''} 
+            <Marker 
                 position={node.coordinates} 
                 icon={{
                     url:router_icon, 
@@ -56,16 +65,11 @@ class Router extends Component<RouterProps> {
                     labelOrigin: new window.google.maps.Point(20,30),
                     anchor: new window.google.maps.Point(20,10),
                 }}
-                animation={(highlight)?google.maps.Animation.DROP:undefined}
+                label={(options.showNodeTitles)? this.getTitleLabel(node.title):''} 
                 onMouseOver = {this.handleMouseOver}
                 onMouseOut  = {this.handleMouseOut}
                 onClick     = {this.handleClick}
             >
-                {showPopup && (
-                    <InfoWindow>
-                        <h5>{node.details}</h5>
-                    </InfoWindow>
-                )}
             </Marker>        
         )
     }

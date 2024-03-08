@@ -17,8 +17,9 @@ export class TopologyClass {
 
     
     private getNodes(series: DataFrame[]): NodeType[] {
-      const frame = series.find((frame) => frame.name === 'nodes');
+      const frame = series.find((frame) => frame.name === 'nodes' || getField(frame,'latitude') && getField(frame,'longitude'));
       if (!frame || frame.fields.length === 0) {
+        console.log('Nodes frame not found')
         return [];
       }
       const idField     =   getField(frame, 'id'); 
@@ -27,6 +28,7 @@ export class TopologyClass {
       const lngField    =   getField(frame, 'longitude')
       const detailsField     = getField(frame, 'details');
       if (!idField || !titleField || !latField || !lngField) {
+        console.log('Missing fields: id: ' + idField + ' titleField: ' + titleField + ' latitude: ' + latField + ' longitude: ' + lngField)
         return [];
       }
       return frame.fields[0].values.reduce (
@@ -36,8 +38,8 @@ export class TopologyClass {
             title: titleField.values[index],
             details: (detailsField)? detailsField.values[index] : '',
             coordinates: {
-              lat: latField.values[index],
-              lng: lngField.values[index]
+              lat: (latField.values[index])? latField.values[index]: -36,
+              lng: (lngField.values[index])? lngField.values[index]: -64
             }
           });
           return acc;
@@ -51,7 +53,7 @@ export class TopologyClass {
   
     private getEdges(series: DataFrame[]): EdgeType[] {
   
-      const frame = series.find((frame) => frame.name === 'edges');    
+      const frame = series.find((frame) => getField(frame, 'source') && getField(frame, 'target'));
       if (!frame || frame.fields.length === 0) {
         console.log('Edges frame not found')
         return [];

@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
   "name": "Topology-Panel",
-  "id": "falcondev-topology-panel",
+  "id": "falcondevtech-topology-panel",
   "info": {
     "keywords": ["panel"],
     "description": "A visualization panel for device network topologies",
@@ -13,8 +13,17 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
+    "screenshots":[
+      {
+        "name": "Graph Screenshot",
+        "path": "img/graph-screenshot.png"
+      },
+      {
+        "name": "Query Screenshot",
+        "path": "img/query-screenshot.png"
+      }
+    ],
     "links": [],
-    "screenshots": [],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },

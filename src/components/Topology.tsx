@@ -2,7 +2,6 @@ import React from 'react'
 
 import { DataFrame } from '@grafana/data';
 import { TopologyOptions} from 'types'
-import { GoogleMap } from '@react-google-maps/api';
 import Router from './Router';
 import Link from './Link'
 import { TopologyClass } from 'TopologyClass';
@@ -10,7 +9,7 @@ import { TopologyClass } from 'TopologyClass';
 
   interface TopologyProps {
     series: DataFrame[],
-    map: GoogleMap | null
+    map: google.maps.Map | null
     options: TopologyOptions
   }
   
