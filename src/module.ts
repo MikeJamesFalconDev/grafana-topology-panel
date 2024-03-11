@@ -4,6 +4,10 @@ import { TopologyPanel } from './components/topology_panel';
 
 export const plugin = new PanelPlugin<TopologyOptions>(TopologyPanel).setPanelOptions((builder) => {
   return builder
+    .addTextInput({
+      path: 'googleMapsApiKey',
+      name: 'Google Maps Api Key',
+    })
     .addBooleanSwitch({
       path: 'showNodeTitles',
       name: 'Show node titles',

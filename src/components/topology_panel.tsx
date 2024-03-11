@@ -13,13 +13,9 @@ interface Props extends PanelProps<TopologyOptions> {}
 
 
 export const TopologyPanel: React.FC<Props> = React.memo(({ options, data, width, height }) => {
-  // const { isLoaded } =  useLoadScript({
-  // });
 
   const { isLoaded } = useJsApiLoader ( {
-    id: 'platinum-voice-414917',
-    googleMapsClientId: 'My Maps Project',
-    googleMapsApiKey: 'AIzaSyChd1bbKy63PS6xO1vuw5SEBI4T4jwzjgY',
+    googleMapsApiKey: options.googleMapsApiKey,
   })
 
   const [map, setMap] = React.useState<google.maps.Map|null>(null)
