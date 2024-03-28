@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Polyline } from '@react-google-maps/api';
+import { InfoWindow, Polyline } from '@react-google-maps/api';
 import { EdgeType, TopologyOptions } from 'types';
 
 interface LinkProps {
@@ -9,27 +9,13 @@ interface LinkProps {
 
 class Link extends Component<LinkProps> {
 
+    compute = google.maps.geometry.spherical
+
     getColor(position: string): string {
         const value = this.props.link.load[(position ==='start')?0:1]
         const colorRanges = this.props.options.linkLight;
         return colorRanges.find((range) => value >= range.threshold)?.color || this.props.options.linkLightDefault;
     }
-
-//function getStroke(props:LinkProps, color: string, position:'start'|'end'): google.maps.IconSequence {
-//    const start = ((position === 'start')?-10: 0).toString(); 
-//    const end = ((position === 'start')? 0: 10).toString(); 
-//    const offset = ((position === 'start')? 0: 1).toString();
-//    return (
-//    { icon:
-//        {
-//            path: 'm 0,'+start+' L 0,'+end,
-//            strokeOpacity: 1,
-//            scale: 4,
-//            strokeColor: color
-//        },
-//        offset: offset
-//    });
-//  }
 
     getLight(props: LinkProps, position: 'start'|'end'): google.maps.IconSequence {
         const offset = ((position === 'start')? 0: 1).toString();
@@ -52,14 +38,9 @@ class Link extends Component<LinkProps> {
             });
         }
 
-//function getLineLength(props:LinkProps, window: Window & typeof globalThis):number {
-//    return Math.round(window.google.maps.geometry.spherical.computeLength(props.link.coordinates))
-//}
 
     getIcons(): google.maps.IconSequence[]|null  {
         return (this.props.options.showLinkUsage)?[
-    //        getStroke(props, '#32a836', 'start'),
-    //        getStroke(props, '#db0404', 'end')
             this.getLight(this.props, 'start'),
             this.getLight(this.props, 'end')
         ]: [];
@@ -86,11 +67,22 @@ class Link extends Component<LinkProps> {
 
     handleClick = (e: google.maps.MapMouseEvent) => {}
 
+    calculatePoputLoc() {
+        const distance = this.compute.computeDistanceBetween(this.props.link.coordinates[0], this.props.link.coordinates[1])
+        const offset = distance * 0.5
+        const heading = this.compute.computeHeading(this.props.link.coordinates[0], this.props.link.coordinates[1])
+        return this.compute.computeOffset(this.props.link.coordinates[0], offset, heading)
+    }
+
     render(): React.ReactNode {
         const link = this.props.link
         const options = this.props.options
-        return (options.showLinks)?(
-            <Polyline path={link.coordinates} 
+        return <div>
+            { this.state.showPopup? <InfoWindow position={this.calculatePoputLoc()}>
+                <h5>Some data</h5>
+            </InfoWindow> : <></>}
+            <Polyline path={link.coordinates}
+                    visible={options.showLinks}
                     options={{
                         strokeColor:    (this.state.highlight)?'white':'dark grey', 
                         strokeWeight:   options.linkWeight, 
@@ -102,8 +94,7 @@ class Link extends Component<LinkProps> {
                     onMouseOut  = {this.handleMouseOut}
                     onClick     = {this.handleClick}
             />
-        ) :
-            <></>
+        </div>
     }
 }
 

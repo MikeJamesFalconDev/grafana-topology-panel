@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Marker } from '@react-google-maps/api';
+import { InfoWindow, Marker } from '@react-google-maps/api';
 import { NodeType, TopologyOptions } from 'types';
 
 const router_icon = 'https://symbols.getvecta.com/stencil_240/204_router.7b208c1133.svg'
@@ -18,7 +18,7 @@ class Router extends Component<RouterProps> {
     handleMouseOver = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: true,
-            highlight: true        
+            highlight: true
         })
     };
 
@@ -46,15 +46,10 @@ class Router extends Component<RouterProps> {
     
 
 //     animation={(highlight)?google.maps.Animation.DROP:undefined}
-                // {showPopup?  (
-                //     <InfoWindow>
-                //         <h5>{node.details}</h5>
-                //     </InfoWindow>
-                // ): <></>}
 
 
       render(): React.ReactNode {
-        // const { showPopup, highlight } = this.state;
+        const { showPopup } = this.state;
         const { node, options } = this.props;
         return (
             <Marker 
@@ -70,6 +65,11 @@ class Router extends Component<RouterProps> {
                 onMouseOut  = {this.handleMouseOut}
                 onClick     = {this.handleClick}
             >
+                {showPopup && node.details?  (
+                    <InfoWindow>
+                        <h5>{node.details}</h5>
+                    </InfoWindow>
+                ): <></>}
             </Marker>        
         )
     }

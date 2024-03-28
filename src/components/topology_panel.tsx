@@ -8,7 +8,6 @@ import Topology from'components/Topology';
 interface Props extends PanelProps<TopologyOptions> {}
 
 //TODOS
-// Eliminar todos los landmarks
 // Agregar hover info en Routers y Links y onClick en Routers
 
 
@@ -16,6 +15,7 @@ export const TopologyPanel: React.FC<Props> = React.memo(({ options, data, width
 
   const { isLoaded } = useJsApiLoader ( {
     googleMapsApiKey: options.googleMapsApiKey,
+    libraries: [ "geometry"]
   })
 
   const [map, setMap] = React.useState<google.maps.Map|null>(null)
@@ -48,7 +48,8 @@ if (!data || !data.series.length) {
           elementType: "labels.icon",
           stylers: [{ visibility: "on" }],
         },
-      ]
+      ],
+      streetViewControl: false
     }
     
   //  const mapStyles = [{"stylers":[{"visibility":"off"}]},

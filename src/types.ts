@@ -5,9 +5,9 @@ interface LightColorThreshold {
 }
 
 export interface TopologyOptions {
+  googleMapsApiKey: string,
   nodeClickUrl: string,
   nodeIconSize: google.maps.Size // Not implemented
-  showNodeTitles: boolean,
   showLinks: boolean,
   showLinkUsage: boolean,
   linkColor: string,
@@ -16,6 +16,7 @@ export interface TopologyOptions {
   linkOpacity: number,
   linkLight: LightColorThreshold[],
   linkLightDefault: string,
+  showNodeTitles: boolean,
 }
 
 export type NodeType = {
