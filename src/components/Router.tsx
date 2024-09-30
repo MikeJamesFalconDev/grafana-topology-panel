@@ -1,31 +1,29 @@
 import React, { Component } from 'react'
 import { InfoWindow, Marker } from '@react-google-maps/api';
-import { NodeType, TopologyOptions } from 'types';
+import { RouterProps } from 'types';
 
 const router_icon = 'https://symbols.getvecta.com/stencil_240/204_router.7b208c1133.svg'
-
-interface RouterProps {
-    node: NodeType,
-    options: TopologyOptions
-}
 
 class Router extends Component<RouterProps> {
     state = {
         showPopup: false,
-        highlight: false        
+        highlight: false,
+        showTitles: false,
     }
 
     handleMouseOver = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: true,
-            highlight: true
+            highlight: true,
+            showTitles: true
         })
     };
 
     handleMouseOut = (e: google.maps.MapMouseEvent) => {
         this.setState({
             showPopup: false,
-            highlight: false
+            highlight: false,
+            showTitles:false
         })
     };
     handleClick = (e: google.maps.MapMouseEvent) => {
@@ -49,18 +47,23 @@ class Router extends Component<RouterProps> {
 
 
       render(): React.ReactNode {
+        console.log('Displaying router')
         const { showPopup } = this.state;
-        const { node, options } = this.props;
+        const node = this.props.node;
+        const offsetX = (this.props.offset)?this.props.offset.x: 0
+        const offsetY = (this.props.offset)?this.props.offset.y: 0
+
         return (
+            <>
             <Marker 
                 position={node.coordinates} 
                 icon={{
                     url:router_icon, 
                     scaledSize: new window.google.maps.Size(40, 20), 
                     labelOrigin: new window.google.maps.Point(20,30),
-                    anchor: new window.google.maps.Point(20,10),
+                    anchor: new window.google.maps.Point(20 + offsetX,10 + offsetY),
                 }}
-                label={(options.showNodeTitles)? this.getTitleLabel(node.title):''} 
+                label={(this.state.showTitles)? this.getTitleLabel(node.title):''} 
                 onMouseOver = {this.handleMouseOver}
                 onMouseOut  = {this.handleMouseOut}
                 onClick     = {this.handleClick}
@@ -70,7 +73,8 @@ class Router extends Component<RouterProps> {
                         <h5>{node.details}</h5>
                     </InfoWindow>
                 ): <></>}
-            </Marker>        
+            </Marker>
+            </>
         )
     }
 }

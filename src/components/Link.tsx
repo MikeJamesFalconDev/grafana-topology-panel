@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { InfoWindow, Polyline } from '@react-google-maps/api';
 import { EdgeType, TopologyOptions } from 'types';
+import 'css/Link.css'
 
 interface LinkProps {
     link: EdgeType
@@ -77,14 +78,20 @@ class Link extends Component<LinkProps> {
     render(): React.ReactNode {
         const link = this.props.link
         const options = this.props.options
+        console.log('Link load: ' + JSON.stringify(this.props.link.load))
         return <div>
-            { this.state.showPopup? <InfoWindow position={this.calculatePoputLoc()}>
-                <h5>Some data</h5>
+            { this.state.showPopup && this.props.link.load[0] > 0? 
+            <InfoWindow position={this.calculatePoputLoc()}>
+                <div>
+                    <h5>{this.props.link.name}</h5>
+                    <h6>{this.props.link.source.title} load {this.props.link.load[0]}</h6>
+                    <h6>{this.props.link.target.title} load {this.props.link.load[1]}</h6>
+                </div>
             </InfoWindow> : <></>}
             <Polyline path={link.coordinates}
                     visible={options.showLinks}
                     options={{
-                        strokeColor:    (this.state.highlight)?'white':'dark grey', 
+                        strokeColor:    (this.state.highlight)?'grey':'dark grey', 
                         strokeWeight:   options.linkWeight, 
                         geodesic:       options.linkGeodesic, 
                         strokeOpacity:  options.linkOpacity,

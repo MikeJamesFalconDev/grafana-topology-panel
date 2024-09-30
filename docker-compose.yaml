@@ -14,3 +14,4 @@ services:
     volumes:
       - ./dist:/var/lib/grafana/plugins/falcondev-topology-panel
       - ./provisioning:/etc/grafana/provisioning
+      - ../falcondev-odl-datasource/dist:/var/lib/grafana/plugins/falcondevtech-odl-datasource

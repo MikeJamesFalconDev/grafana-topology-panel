@@ -7,9 +7,6 @@ import Topology from'components/Topology';
 
 interface Props extends PanelProps<TopologyOptions> {}
 
-//TODOS
-// Agregar hover info en Routers y Links y onClick en Routers
-
 
 export const TopologyPanel: React.FC<Props> = React.memo(({ options, data, width, height }) => {
 

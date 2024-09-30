@@ -13,6 +13,7 @@ export class TopologyClass {
     constructor(series: DataFrame[]) {
       this.nodes = this.getNodes(series);
       this.edges = this.getEdges(series);
+      console.log('Edges ' + this.edges.length)
     }
 
     
@@ -28,27 +29,52 @@ export class TopologyClass {
       const lngField    =   getField(frame, 'longitude')
       const detailsField     = getField(frame, 'details');
       if (!idField || !titleField || !latField || !lngField) {
-        console.log('Missing fields: id: ' + idField + ' titleField: ' + titleField + ' latitude: ' + latField + ' longitude: ' + lngField)
+        console.log('Missing fields: id: ' + idField + ' title: ' + titleField + ' latitude: ' + latField + ' longitude: ' + lngField)
         return [];
       }
+      const locations = new Map<string, NodeType>()
+      let lat, lng, latlng
+      let coordinates: google.maps.LatLng
+      let node: NodeType
       return frame.fields[0].values.reduce (
         (acc, value,index) => {
-          acc.push( {
+          lat = (latField.values[index])? latField.values[index]: -36
+          lng = (lngField.values[index])? lngField.values[index]: -64
+          latlng = lat + '_' + lng
+          coordinates = new google.maps.LatLng( {
+              lat: lat,
+              lng: lng
+            }
+          )
+          node =  {
             name: idField.values[index],
             title: titleField.values[index],
             details: (detailsField)? detailsField.values[index] : '',
-            coordinates: {
-              lat: (latField.values[index])? latField.values[index]: -36,
-              lng: (lngField.values[index])? lngField.values[index]: -64
+            coordinates: coordinates,
+            more: []
+          }
+          node.more.push(node)
+          if (locations.has(latlng)) {
+            let existing = locations.get(latlng)
+            if (existing) {
+              existing.more.push(node)
             }
-          });
+          } else {
+            console.log('Adding node')
+            acc.push(node)
+            locations.set(latlng, node)
+          }
           return acc;
         } , []
       );
     }
   
     private findNode(name: String): NodeType | undefined {
-      return this.nodes.find((curr)=> curr.name === name);
+      let node = this.nodes.find((curr)=> curr.name === name);
+      if (!node) {
+        this.nodes.forEach((current) => node = current.more.find((curr)=> curr.name === name))
+      }
+      return node
     }
   
     private getEdges(series: DataFrame[]): EdgeType[] {
@@ -74,14 +100,17 @@ export class TopologyClass {
           if (source && target) {
             acc.push(
               {
-                name: source.name+ '-' + target.name,
+                name: source.title + '-' + target.title,
+                source: source,
+                target: target,
                 endpoints: [source.name,target.name],
                 coordinates: [source.coordinates, target.coordinates],
-                load: [ (sourceLoadField)? sourceLoadField.values[index]: '', (targetLoadField)? targetLoadField.values[index]: '' ]
+                load: [ (sourceLoadField)? sourceLoadField.values[index]: -1, (targetLoadField)? targetLoadField.values[index]: -1 ]
               }
             )
           } else {
-            console.log('Source or Target not found: '+ value + '\n\tsource: '+ source + '\n\ttarget: '+target);
+            console.log('Source or Target not found: index: ' + index + '\tvalue: ' + value + '\n\tsource: '+ source + '\n\ttarget: '+target);
+            console.log(sourceField.values[index])
           }
           return acc;
         }, []

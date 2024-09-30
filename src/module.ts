@@ -6,12 +6,6 @@ export const plugin = new PanelPlugin<TopologyOptions>(TopologyPanel).setPanelOp
   return builder
     .addBooleanSwitch({
       category: ['Layers'],
-      path: 'showNodeTitles',
-      name: 'Titles',
-      defaultValue: true,
-    })
-    .addBooleanSwitch({
-      category: ['Layers'],
       path: 'showLinks',
       name: 'Links',
       defaultValue: true,
