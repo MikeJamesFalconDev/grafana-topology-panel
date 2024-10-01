@@ -9,7 +9,8 @@ class Site extends Component<RouterProps> {
         showPopup: false,
         highlight: false,
         showTitles: false,
-        exploded: false
+        exploded: false,
+        r: 100
     }
 
     handleMouseOver = (e: google.maps.MapMouseEvent) => {
@@ -63,16 +64,37 @@ class Site extends Component<RouterProps> {
         const { showPopup } = this.state;
         const { node, options} = this.props;
         let explodedNodes: NodeType[] = (this.state.exploded)? node.more: []
+        let anchor
+        let icon
+        if (this.state.exploded) {
+            anchor = new window.google.maps.Point(this.state.r,this.state.r)
+            const cw = this.state.r * 2
+            const ch = cw
+            const cr = this.state.r
+            const svg = '<svg id="some_id" data-name="some_name" xmlns="http://www.w3.org/2000/svg" viewbox ="0 0 '+cw +' '+ch+'" width="'+cw+'" height="'+ch+'"><circle cx="'+cr+'" cy="'+cr+'" r="'+cr+'" fill-opacity="0.3" fill="blue"/></svg>'
+            let icon_url = (this.state.exploded)? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg) : site_icon
+            icon = {
+                url: icon_url,
+                labelOrigin: new window.google.maps.Point(40,90),
+                anchor: anchor,
+
+            }
+        } else {
+            anchor = new window.google.maps.Point(20,50)
+            icon = {
+                url: site_icon,
+                scaledSize: new window.google.maps.Size(80, 80),
+                labelOrigin: new window.google.maps.Point(40,90),
+                anchor: anchor,
+
+            }
+        }
+
         return (
             <>
             <Marker 
                 position={node.coordinates} 
-                icon={{
-                    url:site_icon, 
-                    scaledSize: new window.google.maps.Size(80, 80), 
-                    labelOrigin: new window.google.maps.Point(40,90),
-                    anchor: new window.google.maps.Point(20,50),
-                }}
+                icon={icon}
                 label={(this.state.showTitles && ! this.state.exploded)? this.getTitleLabel(node):''} 
                 onMouseOver = {this.handleMouseOver}
                 onMouseOut  = {this.handleMouseOut}
