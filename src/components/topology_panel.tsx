@@ -3,7 +3,7 @@ import { PanelProps } from '@grafana/data';
 import { TopologyOptions } from 'types';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 // import { APIProvider, Map } from '@vis.gl/react-google-maps'
-import Topology from'components/Topology';
+import Topology from 'components/Topology';
 
 interface Props extends PanelProps<TopologyOptions> {}
 
@@ -17,15 +17,20 @@ export const TopologyPanel: React.FC<Props> = React.memo(({ options, data, width
 
   const [map, setMap] = React.useState<google.maps.Map|null>(null)
 
-  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(map)
+  const onLoad = React.useCallback(function callback(newMap: google.maps.Map) {
+    setMap(newMap)
   }, [])
 
 
   const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+    console.log('Map unmounted')
     setMap(null)
   }, [])
 
+  function getMap(): google.maps.Map | null {
+    console.log('getMap(): ' + map)
+    return map
+  }
 
 if (!data || !data.series.length) {
     return (
@@ -62,11 +67,12 @@ if (!data || !data.series.length) {
 
 
     // return (
-    //   <APIProvider apiKey='AIzaSyCwHh8f8gKvU60bbyFKM4lvzIhwmi9ZYzg'>
-    //     <Map 
-    //       center={{ lat: 61, lng: -149}} zoom={10}
-    //     >
-    //       {/* <Topology series={data.series} map={map} options={options} /> */}
+    //   <APIProvider 
+    //       apiKey={options.googleMapsApiKey} 
+    //       libraries={["geometry"]}
+    //   >
+    //     <Map >
+    //       { <Topology series={data.series} getMap={() => null} options={options} /> }
     //     </Map>
     //   </APIProvider>
     // );
@@ -78,9 +84,9 @@ if (!data || !data.series.length) {
           onUnmount={onUnmount}
           options={mapOptions}
       >
-        <Topology series={data.series} map={map} options={options} />
+        <Topology series={data.series} options={options} getMap={getMap}/>
       </GoogleMap>
   ) : <div>Error loading maps</div>;
 
-});
+})
 TopologyPanel.displayName = "TopologyPanel"

@@ -1,15 +1,20 @@
 import React, { Component } from 'react'
 import { InfoWindow, Marker } from '@react-google-maps/api';
-import { NodeType, Offset, RouterProps } from 'types';
+import { Offset, SiteProps } from 'types';
 import site_icon from 'img/building.svg'
 import Router from './Router';
 
-class Site extends Component<RouterProps> {
+class Site extends Component<SiteProps> {
+
     state = {
         showPopup: false,
         highlight: false,
         showTitles: false,
-        exploded: false,
+        expanded: false,
+        offset: {
+            x: 0,
+            y: 0
+        },
         r: 100
     }
 
@@ -31,15 +36,21 @@ class Site extends Component<RouterProps> {
         })
     };
     handleClick = (e: google.maps.MapMouseEvent) => {
+        if (!this.state.expanded) {
+            this.props.addRouters(this.props.routers)
+        } else {
+            this.props.removeRouters(this.props.routers)
+        }
         this.setState({
             ...this.state,
-            exploded: !this.state.exploded
+            expanded: !this.state.expanded
         })
+        
     }
 
-    getTitleLabel(node: NodeType): google.maps.MarkerLabel {
+    getTitleLabel(): google.maps.MarkerLabel {
         let title = ''
-        node.more.forEach((child) => title += child.title + ' ')
+        this.props.routers.forEach((child) => title += child.props.title + ' ')
         return {
           text: title,
           fontSize: '10'
@@ -47,37 +58,50 @@ class Site extends Component<RouterProps> {
       }
     
       getChildCoords(index: number, count: number): Offset {
+        if (this.state.expanded === true) {
+            console.log('Not expanded')
+            return { x: 0, y: 0}
+        }
+
         const r = 100
         const alfa = 2 * Math.PI / count
-        console.log('Displacement: Lat:' + (r * Math.sin(alfa * index)) + ' Lng; ' + (r * Math.cos(alfa * index)))
+        console.log('x:' + r * Math.sin(alfa * index) + ' y:' + r * Math.cos(alfa * index))
         return {
             x: r * Math.sin(alfa * index),
             y: r * Math.cos(alfa * index)
           }
       }
 
-//     animation={(highlight)?google.maps.Animation.DROP:undefined}
+      updateOffsets() {
+        let count = this.props.routers.length
+        for(let i=0; i < count; i++) {
+            console.log('Updating coordinates for ' + this.props.routers[i].props.title)
+            this.props.routers[i].setOffset(this.getChildCoords(i,count))
+        }
+      }
+
+      public add(router: Router) {
+        this.props.routers.push(router)
+        this.updateOffsets()
+      }
 
 
       render(): React.ReactNode {
-        console.log('Displaying site')
+        console.log('Site render: ' + this.props.routers.length)
         const { showPopup } = this.state;
-        const { node, options} = this.props;
-        let explodedNodes: NodeType[] = (this.state.exploded)? node.more: []
         let anchor
         let icon
-        if (this.state.exploded) {
+        if (this.state.expanded) {
             anchor = new window.google.maps.Point(this.state.r,this.state.r)
             const cw = this.state.r * 2
             const ch = cw
             const cr = this.state.r
             const svg = '<svg id="some_id" data-name="some_name" xmlns="http://www.w3.org/2000/svg" viewbox ="0 0 '+cw +' '+ch+'" width="'+cw+'" height="'+ch+'"><circle cx="'+cr+'" cy="'+cr+'" r="'+cr+'" fill-opacity="0.3" fill="blue"/></svg>'
-            let icon_url = (this.state.exploded)? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg) : site_icon
+            let icon_url = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
             icon = {
                 url: icon_url,
                 labelOrigin: new window.google.maps.Point(40,90),
                 anchor: anchor,
-
             }
         } else {
             anchor = new window.google.maps.Point(20,50)
@@ -86,34 +110,27 @@ class Site extends Component<RouterProps> {
                 scaledSize: new window.google.maps.Size(80, 80),
                 labelOrigin: new window.google.maps.Point(40,90),
                 anchor: anchor,
-
             }
         }
 
         return (
             <>
             <Marker 
-                position={node.coordinates} 
+                position={this.props.coordinates} 
                 icon={icon}
-                label={(this.state.showTitles && ! this.state.exploded)? this.getTitleLabel(node):''} 
+                label={(this.state.showTitles && ! this.state.expanded)? this.getTitleLabel():''} 
                 onMouseOver = {this.handleMouseOver}
                 onMouseOut  = {this.handleMouseOut}
                 onClick     = {this.handleClick}
             >
-                {showPopup && node.details?  (
+                {showPopup && this.props.details?  (
                     <InfoWindow>
-                        <h5>{node.details}</h5>
+                        <h5>{this.props.details}</h5>
                     </InfoWindow>
                 ): <></>}
             </Marker>
 
-            {
-                explodedNodes.map((child, index, children) => 
-                <>
-                    <Router key={child.name} node={child} offset={this.getChildCoords(index, children.length)} options={options} />
-                </>
-                )
-            }
+            {/* { this.state.expanded && this.props.routers.map((router, index, routers) => <Router key={index} {...router.props} offset={this.getChildCoords(index, routers.length)} /> )} */}
             </>
         )
     }

@@ -1,4 +1,5 @@
 import { DataFrame } from '@grafana/data';
+import Router from './components/Router'
 
 interface LightColorThreshold {
   threshold: number,
@@ -20,40 +21,51 @@ export interface TopologyOptions {
   showNodeTitles: boolean,
 }
 
-export type NodeType = {
-  name: string,
-  title: string,
-  details: string,
-  coordinates: google.maps.LatLng,
-  more: NodeType[]
-}
-
 export type EdgeType = {
-  name: string,
-  source: NodeType,
-  target: NodeType,
-  endpoints: String[],
-  coordinates: google.maps.LatLng[],
+  name: string
+  source: Router,
+  target: Router,
   load: number[]
 }
 
 export interface TopologyProps {
   series: DataFrame[],
-  map: google.maps.Map | null
   options: TopologyOptions
+  getMap: () => google.maps.Map | null
+}
+
+export interface TopologyState {
+  expandedRouters:  Router[],
 }
 
 
 export interface RouterProps {
-  node: NodeType,
-  options: TopologyOptions
-  offset?: Offset
+  name: string,
+  title: string,
+  details: string,
+  coordinates: google.maps.LatLng,
+  options: TopologyOptions,
+  routers: Router[]
+  getMap: () => google.maps.Map | null
 }
+
+export interface SiteProps extends RouterProps {
+  addRouters: (routers: Router[]) => void
+  removeRouters: (routers: Router[]) => void
+}
+
+
+export interface LinkProps {
+  link: EdgeType
+  options: TopologyOptions
+}
+
 
 export interface Offset {
   x: number
   y: number
 }
+
 
 export const RED = '#db0404'
 export const YELLOW = '#f0e805'

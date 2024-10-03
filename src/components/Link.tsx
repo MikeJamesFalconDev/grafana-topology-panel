@@ -1,12 +1,7 @@
 import React, { Component } from 'react'
 import { InfoWindow, Polyline } from '@react-google-maps/api';
-import { EdgeType, TopologyOptions } from 'types';
+import { LinkProps } from 'types';
 import 'css/Link.css'
-
-interface LinkProps {
-    link: EdgeType
-    options: TopologyOptions
-}
 
 class Link extends Component<LinkProps> {
 
@@ -68,27 +63,36 @@ class Link extends Component<LinkProps> {
 
     handleClick = (e: google.maps.MapMouseEvent) => {}
 
+    getTitle() {
+        return this.props.link.source.props.title + '<->' + this.props.link.target.props.title
+    }
+
+    getCoordinates(): google.maps.LatLng[] {
+        return [this.props.link.source.getCoordinates(), this.props.link.target.getCoordinates()]
+    }
+
     calculatePoputLoc() {
-        const distance = this.compute.computeDistanceBetween(this.props.link.coordinates[0], this.props.link.coordinates[1])
+        const srcCoords = this.props.link.source.getCoordinates()
+        const targetCoords = this.props.link.target.getCoordinates()
+        const distance = this.compute.computeDistanceBetween(srcCoords, targetCoords)
         const offset = distance * 0.5
-        const heading = this.compute.computeHeading(this.props.link.coordinates[0], this.props.link.coordinates[1])
-        return this.compute.computeOffset(this.props.link.coordinates[0], offset, heading)
+        const heading = this.compute.computeHeading(srcCoords, targetCoords)
+        return this.compute.computeOffset(srcCoords, offset, heading)
     }
 
     render(): React.ReactNode {
-        const link = this.props.link
+        console.log('Link render')
         const options = this.props.options
-        console.log('Link load: ' + JSON.stringify(this.props.link.load))
         return <div>
             { this.state.showPopup && this.props.link.load[0] > 0? 
             <InfoWindow position={this.calculatePoputLoc()}>
                 <div>
-                    <h5>{this.props.link.name}</h5>
-                    <h6>{this.props.link.source.title} load {this.props.link.load[0]}</h6>
-                    <h6>{this.props.link.target.title} load {this.props.link.load[1]}</h6>
+                    <h5>{this.getTitle()}</h5>
+                    <h6>{this.props.link.source.props.title} load {this.props.link.load[0]}</h6>
+                    <h6>{this.props.link.target.props.title} load {this.props.link.load[1]}</h6>
                 </div>
             </InfoWindow> : <></>}
-            <Polyline path={link.coordinates}
+            <Polyline path={this.getCoordinates()}
                     visible={options.showLinks}
                     options={{
                         strokeColor:    (this.state.highlight)?'grey':'dark grey', 
