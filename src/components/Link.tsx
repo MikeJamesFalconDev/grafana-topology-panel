@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
-import { InfoWindow, Polyline } from '@react-google-maps/api';
 import { LinkProps } from 'types';
 import 'css/Link.css'
+import { Polyline } from './poliyline';
+
 
 class Link extends Component<LinkProps> {
 
-    compute = google.maps.geometry.spherical
+    // compute = google.maps.geometry?.spherical
 
     getColor(position: string): string {
-        const value = this.props.link.load[(position ==='start')?0:1]
+        const value = this.props.load[(position ==='start')?0:1]
         const colorRanges = this.props.options.linkLight;
         return colorRanges.find((range) => value >= range.threshold)?.color || this.props.options.linkLightDefault;
     }
@@ -16,7 +17,7 @@ class Link extends Component<LinkProps> {
     getLight(props: LinkProps, position: 'start'|'end'): google.maps.IconSequence {
         const offset = ((position === 'start')? 0: 1).toString();
         const cx = 0;
-        const cy =(position === 'start')?-4: 4;
+        const cy =(position === 'start')?-10: 10;
         const r = 1;
         const d = r*2;
         return (
@@ -64,47 +65,48 @@ class Link extends Component<LinkProps> {
     handleClick = (e: google.maps.MapMouseEvent) => {}
 
     getTitle() {
-        return this.props.link.source.props.title + '<->' + this.props.link.target.props.title
+        return this.props.source.title + '<->' + this.props.target.title
     }
 
     getCoordinates(): google.maps.LatLng[] {
-        return [this.props.link.source.getCoordinates(), this.props.link.target.getCoordinates()]
+        return [this.props.source.coordinates, this.props.target.coordinates]
     }
 
-    calculatePoputLoc() {
-        const srcCoords = this.props.link.source.getCoordinates()
-        const targetCoords = this.props.link.target.getCoordinates()
-        const distance = this.compute.computeDistanceBetween(srcCoords, targetCoords)
-        const offset = distance * 0.5
-        const heading = this.compute.computeHeading(srcCoords, targetCoords)
-        return this.compute.computeOffset(srcCoords, offset, heading)
-    }
+    // calculatePoputLoc() {
+    //     const srcCoords = this.props.link.source.getCoordinates()
+    //     const targetCoords = this.props.link.target.getCoordinates()
+    //     const distance = this.compute.computeDistanceBetween(srcCoords, targetCoords)
+    //     const offset = distance * 0.5
+    //     const heading = this.compute.computeHeading(srcCoords, targetCoords)
+    //     return this.compute.computeOffset(srcCoords, offset, heading)
+    // }
 
     render(): React.ReactNode {
         console.log('Link render')
         const options = this.props.options
+        // console.log("Path " + JSON.stringify(this.getCoordinates()))
+        console.log("weight: " + options.linkWeight + " geodesic " + options.linkGeodesic + " opacity " + options.linkOpacity)
         return <div>
-            { this.state.showPopup && this.props.link.load[0] > 0? 
+            {/* { this.state.showPopup && this.props.link.load[0] > 0? 
             <InfoWindow position={this.calculatePoputLoc()}>
                 <div>
                     <h5>{this.getTitle()}</h5>
                     <h6>{this.props.link.source.props.title} load {this.props.link.load[0]}</h6>
                     <h6>{this.props.link.target.props.title} load {this.props.link.load[1]}</h6>
                 </div>
-            </InfoWindow> : <></>}
+            </InfoWindow> : <></>} */}
             <Polyline path={this.getCoordinates()}
                     visible={options.showLinks}
-                    options={{
-                        strokeColor:    (this.state.highlight)?'grey':'dark grey', 
-                        strokeWeight:   options.linkWeight, 
-                        geodesic:       options.linkGeodesic, 
-                        strokeOpacity:  options.linkOpacity,
-                        icons:          this.getIcons()
-                    }}
+                    icons={this.getIcons()}
+                    geodesic={options.linkGeodesic}
+                    editable={false}
+                    strokeColor={(this.state.highlight)?'grey':'dark grey'}
+                    strokeWeight={options.linkWeight}
+                    strokeOpacity={options.linkOpacity}
                     onMouseOver = {this.handleMouseOver}
                     onMouseOut  = {this.handleMouseOut}
                     onClick     = {this.handleClick}
-            />
+            /> 
         </div>
     }
 }

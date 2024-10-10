@@ -3,31 +3,33 @@ import React, { Component } from 'react'
 import Router from './Router';
 import Link from './Link'
 import Site from './Site';
-import { TopologyProps, RouterProps, EdgeType, LinkProps, TopologyState } from 'types';
+import { TopologyProps, RouterProps, TopologyState, LinkProps, SiteProps } from 'types';
 import { DataFrame, Field } from '@grafana/data';
+import { GoogleMapsContext } from '@vis.gl/react-google-maps';
 
 
 class Topology extends Component<TopologyProps,TopologyState> {
-  
+  static contextType = GoogleMapsContext;
+  context!: React.ContextType<typeof GoogleMapsContext>;
+
+
   constructor(props: TopologyProps) {
     super(props)
-    this.addRouters = this.addRouters.bind(this)
-    this.removeRouters = this.removeRouters.bind(this)
+    this.routersChanged = this.routersChanged.bind(this)
     this.getNodes(this.props.series);
     this.getLinks(this.props.series);
     console.log('Router count: ' + this.routers.length)
-    console.log('Site count: ' + this.sites.length + ' containing ' + this.sites[0].props.routers.length)
+    console.log('Site count: ' + this.sites.length + ' containing ' + this.sites[0].routers.length)
     console.log('Link count: ' + this.links.length)
-
   }
 
-  state: TopologyState = {
-    expandedRouters: []
+  state = {
+    expandedRouters: 1
   }
 
-  routers:  Router[]  = []
-  sites:    Site[]    = []
-  links:    Link[]    = []
+  routers:  RouterProps[]  = []
+  sites:    SiteProps[]    = []
+  links:    LinkProps[]    = []
 
   
   private getField(frame: DataFrame, name: string) {
@@ -46,23 +48,8 @@ class Topology extends Component<TopologyProps,TopologyState> {
       details: (detailsField)? detailsField.values[index] : '',
       coordinates: coordinates,
       options: this.props.options,
-      routers: [],
-      getMap: this.props.getMap
     }
     return props
-  }
-
-  addRouters(routers: Router[]) {
-    routers.concat(this.state.expandedRouters)
-    this.setState({
-      expandedRouters: routers
-    })
-  }
-
-  removeRouters(routers: Router[]) {
-    let newArr: Router[] = []
-    newArr.concat(this.state.expandedRouters.filter(expRouter => routers.indexOf(expRouter) === -1))
-    this.setState({expandedRouters: newArr})
   }
 
   private getNodes(series: DataFrame[]) {
@@ -80,9 +67,9 @@ class Topology extends Component<TopologyProps,TopologyState> {
       console.log('Missing fields: id: ' + idField + ' title: ' + titleField + ' latitude: ' + latField + ' longitude: ' + lngField)
       return
     }
-    const locations = new Map<string, Router|Site>()
+    const locations = new Map<string, RouterProps|SiteProps>()
     let lat: number, lng: number, latlng: string
-    let router: Router
+    let router: RouterProps
     this.sites = []
     this.routers = []
     frame.fields[0].values.forEach (
@@ -90,17 +77,15 @@ class Topology extends Component<TopologyProps,TopologyState> {
         lat = (latField.values[index])? latField.values[index]: -36
         lng = (lngField.values[index])? lngField.values[index]: -64
         latlng = lat + '_' + lng
-        router = new Router(this.getRouterProps(idField, titleField, detailsField, lat, lng, index))
+        router = this.getRouterProps(idField, titleField, detailsField, lat, lng, index)
 
         if (locations.has(latlng)) {
           let existing = locations.get(latlng)
           if (existing) {
-            if (existing instanceof Site) {
-              existing.add(router)
+            if ('routers' in existing) {
+              existing.routers.push(router)
             } else {
-              let siteProps = {...router.props, addRouters: this.addRouters, removeRouters: this.removeRouters}
-              let site: Site = new Site(siteProps)
-              site.add(router)
+              let site: SiteProps = {...router, routers: [router], routersChanged: this.routersChanged}
               let i = this.routers.indexOf(existing)
               if (index >= 0) {
                 this.routers.splice(i, 1)
@@ -117,24 +102,27 @@ class Topology extends Component<TopologyProps,TopologyState> {
     );
   }
 
-  private findNode(name: String): Router | undefined {
-    let node = this.routers.find((curr)=> curr.props.name === name);
+  routersChanged(routers: RouterProps[]) {
+    const links2Rerender = this.links.filter(link => routers.includes(link.source) || routers.includes(link.target)).forEach(link => link.updated = Date.now())
+    console.log('Links to re-render ' + JSON.stringify(links2Rerender))
+  }
+
+  private findNode(name: String): RouterProps | undefined {
+    let node = this.routers.find((curr)=> curr.name === name);
     if (!node) {
-      this.sites.forEach((current) => node = current.props.routers.find((curr)=> curr.props.name === name))
+      this.sites.forEach((current) => node = current.routers.find((curr)=> curr.name === name))
     }
     return node
   }
 
-  private getLinkProps(source: Router, target: Router, sourceLoadField: Field | undefined, targetLoadField: Field | undefined, index: number): LinkProps {
-    let edgeType: EdgeType = {
-      name: source.props.title + '-' + target.props.title,
+  private getLinkProps(source: RouterProps, target: RouterProps, sourceLoadField: Field | undefined, targetLoadField: Field | undefined, index: number): LinkProps {
+    return {
+      name: source.title + '-' + target.title,
       source: source,
       target: target,
-      load: [ (sourceLoadField)? sourceLoadField.values[index]: -1, (targetLoadField)? targetLoadField.values[index]: -1 ]
-    }
-    return {
-      link: edgeType,
-      options: this.props.options
+      load: [ (sourceLoadField)? sourceLoadField.values[index]: -1, (targetLoadField)? targetLoadField.values[index]: -1 ],
+      options: this.props.options,
+      updated: Date.now()
     }
 
   }
@@ -160,7 +148,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
         const source = this.findNode(sourceField.values[index]);
         const target = this.findNode(targetField.values[index]);
         if (source && target) {
-          acc.push( new Link(this.getLinkProps(source, target, sourceLoadField, targetLoadField, index)))
+          acc.push( this.getLinkProps(source, target, sourceLoadField, targetLoadField, index))
         } else {
           console.log('Source or Target not found: index: ' + index + '\tvalue: ' + value + '\n\tsource: '+ source + '\n\ttarget: '+target);
           console.log(sourceField.values[index])
@@ -170,26 +158,21 @@ class Topology extends Component<TopologyProps,TopologyState> {
     );
   }
 
-
-
-
   render(): React.ReactNode {
-    console.log('Topology render')
-    const map = this.props.getMap()
+    console.log('Topology render ' + this.state.expandedRouters)
+    const {map} = this.context!
     if (map != null) {
       const bounds = new window.google.maps.LatLngBounds();
-      Object.values(this.routers).map((router)=> bounds.extend(router.props.coordinates));
-      Object.values(this.sites).map((site)=> bounds.extend(site.props.coordinates));
+      Object.values(this.routers).map((router)=> bounds.extend(router.coordinates));
+      Object.values(this.sites).map((site)=> bounds.extend(site.coordinates));
       map.fitBounds(bounds);
     }
-    console.log("Expanded router count " + this.state.expandedRouters.length)
     return (
-      <div>
-      { this.routers.map((router, index) => <Router key={index} {...router.props} />) }
-      { this.state.expandedRouters.map((router, index) => <Router key={'e'+index} {...router.props} />) }
-      { this.sites.map((site, index) => <Site key={index} {...site.props} />) }
-      { this.links.map((link, index) => <Link key={index} {...link.props} />) }
-      </div>
+      <>
+      { this.routers.map((router,index)   => <Router key={index} {...router} /> ) }
+      { this.sites.map((site, index)      => <Site   key={index} {...site}   /> ) }
+      { this.links.map((link, index)      => <Link   key={index} {...link}   /> ) }
+      </>
     )
   }
 }

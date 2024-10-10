@@ -1,5 +1,4 @@
-import { DataFrame } from '@grafana/data';
-import Router from './components/Router'
+import { DataFrame, PanelData, PanelProps } from '@grafana/data';
 
 interface LightColorThreshold {
   threshold: number,
@@ -21,21 +20,31 @@ export interface TopologyOptions {
   showNodeTitles: boolean,
 }
 
-export type EdgeType = {
-  name: string
-  source: Router,
-  target: Router,
-  load: number[]
+// export type EdgeType = {
+//   name: string
+//   source: Router,
+//   target: Router,
+//   load: number[]
+// }
+
+export interface TopologyPanelProps extends PanelProps<TopologyOptions> {
+  options:  TopologyOptions
+  data:     PanelData
+  width:    number
+  height:   number
 }
+
+export interface TopologyPanelState {
+}
+
 
 export interface TopologyProps {
   series: DataFrame[],
   options: TopologyOptions
-  getMap: () => google.maps.Map | null
 }
 
 export interface TopologyState {
-  expandedRouters:  Router[],
+  expandedRouters:  number,
 }
 
 
@@ -45,19 +54,23 @@ export interface RouterProps {
   details: string,
   coordinates: google.maps.LatLng,
   options: TopologyOptions,
-  routers: Router[]
-  getMap: () => google.maps.Map | null
 }
 
 export interface SiteProps extends RouterProps {
-  addRouters: (routers: Router[]) => void
-  removeRouters: (routers: Router[]) => void
+  // addRouters: (routers: Router[]) => void
+  // removeRouters: (routers: Router[]) => void
+  routers: RouterProps[]
+  routersChanged: (routerProps: RouterProps[]) => void
 }
 
 
 export interface LinkProps {
-  link: EdgeType
+  name: string
+  source: RouterProps,
+  target: RouterProps,
+  load: number[]
   options: TopologyOptions
+  updated: number
 }
 
 
