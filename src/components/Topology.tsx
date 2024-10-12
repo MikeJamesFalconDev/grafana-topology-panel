@@ -24,7 +24,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
   }
 
   state = {
-    expandedRouters: 1
+    updated: Date.now()
   }
 
   routers:  RouterProps[]  = []
@@ -105,6 +105,10 @@ class Topology extends Component<TopologyProps,TopologyState> {
   routersChanged(routers: RouterProps[]) {
     const links2Rerender = this.links.filter(link => routers.includes(link.source) || routers.includes(link.target)).forEach(link => link.updated = Date.now())
     console.log('Links to re-render ' + JSON.stringify(links2Rerender))
+    this.setState({
+      ...this.state,
+      updated: Date.now()
+    })
   }
 
   private findNode(name: String): RouterProps | undefined {
@@ -159,7 +163,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
   }
 
   render(): React.ReactNode {
-    console.log('Topology render ' + this.state.expandedRouters)
+    console.log('Topology render')
     const {map} = this.context!
     if (map != null) {
       const bounds = new window.google.maps.LatLngBounds();

@@ -44,7 +44,7 @@ export interface TopologyProps {
 }
 
 export interface TopologyState {
-  expandedRouters:  number,
+  updated: number
 }
 
 
