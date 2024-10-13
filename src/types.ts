@@ -1,4 +1,4 @@
-import { DataFrame } from '@grafana/data';
+import { DataFrame, PanelData, PanelProps } from '@grafana/data';
 
 interface LightColorThreshold {
   threshold: number,
@@ -20,40 +20,63 @@ export interface TopologyOptions {
   showNodeTitles: boolean,
 }
 
-export type NodeType = {
-  name: string,
-  title: string,
-  details: string,
-  coordinates: google.maps.LatLng,
-  more: NodeType[]
+export interface TopologyPanelProps extends PanelProps<TopologyOptions> {
+  options:  TopologyOptions
+  data:     PanelData
+  width:    number
+  height:   number
 }
 
-export type EdgeType = {
-  name: string,
-  source: NodeType,
-  target: NodeType,
-  endpoints: String[],
-  coordinates: google.maps.LatLng[],
-  load: number[]
+export interface TopologyPanelState {
 }
+
 
 export interface TopologyProps {
   series: DataFrame[],
-  map: google.maps.Map | null
   options: TopologyOptions
+}
+
+export interface TopologyState {
+  updated: number
 }
 
 
 export interface RouterProps {
-  node: NodeType,
-  options: TopologyOptions
-  offset?: Offset
+  name: string,
+  title: string,
+  details: string,
+  coordinates: google.maps.LatLng,
+  options: TopologyOptions,
 }
+
+export interface SiteProps extends RouterProps {
+  id: number
+  routers: RouterProps[]
+  expanded: boolean
+  routersChanged: (site: SiteProps) => void
+}
+
+
+export interface LinkProps {
+  name: string
+  source: RouterProps,
+  target: RouterProps,
+  load: number[]
+  options: TopologyOptions
+  updated: number
+}
+
+export interface LinkState {
+  showPopup: boolean,
+  highlight: boolean
+}
+
 
 export interface Offset {
   x: number
   y: number
 }
+
 
 export const RED = '#db0404'
 export const YELLOW = '#f0e805'

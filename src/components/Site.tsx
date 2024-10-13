@@ -1,121 +1,106 @@
 import React, { Component } from 'react'
-import { InfoWindow, Marker } from '@react-google-maps/api';
-import { NodeType, Offset, RouterProps } from 'types';
+import { BLUE, Offset, SiteProps } from 'types';
 import site_icon from 'img/building.svg'
 import Router from './Router';
+import {AdvancedMarker, GoogleMapsContext, InfoWindow} from '@vis.gl/react-google-maps';
+import { Circle } from './circle';
 
-class Site extends Component<RouterProps> {
+
+class Site extends Component<SiteProps> {
+    static contextType = GoogleMapsContext;
+    context!: React.ContextType<typeof GoogleMapsContext>;
+
     state = {
         showPopup: false,
         highlight: false,
-        showTitles: false,
-        exploded: false,
         r: 100
     }
 
-    handleMouseOver = (e: google.maps.MapMouseEvent) => {
-        this.setState({
-            ...this.state,
-            showPopup: true,
-            highlight: true,
-            showTitles: true
-        })
-    };
-
-    handleMouseOut = (e: google.maps.MapMouseEvent) => {
-        this.setState({
-            ...this.state,
-            showPopup: false,
-            highlight: false,
-            showTitles: false
-        })
-    };
     handleClick = (e: google.maps.MapMouseEvent) => {
-        this.setState({
-            ...this.state,
-            exploded: !this.state.exploded
-        })
+        console.log('handleClick start')
+        this.props.routersChanged(this.props)        
+        console.log('handleClick end')
     }
 
-    getTitleLabel(node: NodeType): google.maps.MarkerLabel {
+    getTitleLabel(): google.maps.MarkerLabel {
         let title = ''
-        node.more.forEach((child) => title += child.title + ' ')
+        this.props.routers.forEach((child) => title += child.title + ' ')
         return {
           text: title,
           fontSize: '10'
         }
       }
     
-      getChildCoords(index: number, count: number): Offset {
+      getChildCoords(index: number, count: number): google.maps.LatLng {
+        if (this.props.expanded === false) {
+            return this.props.coordinates
+        }
+
         const r = 100
         const alfa = 2 * Math.PI / count
-        console.log('Displacement: Lat:' + (r * Math.sin(alfa * index)) + ' Lng; ' + (r * Math.cos(alfa * index)))
-        return {
+        let offset: Offset = {
             x: r * Math.sin(alfa * index),
             y: r * Math.cos(alfa * index)
           }
+          return this.getCoordinates(offset)
       }
 
-//     animation={(highlight)?google.maps.Animation.DROP:undefined}
+      getCoordinates(offset: Offset): google.maps.LatLng {
+        if (!this.context) {
+            return this.props.coordinates
+        }
+        const {map} = this.context!
+        const zoom: number| undefined = map?.getZoom()
+        const projection: google.maps.Projection | undefined = map?.getProjection()
+        if (!map) {
+            return this.props.coordinates
+        }
+        if (!projection || !zoom) {
+            return this.props.coordinates
+        }
+        let loc: google.maps.Point | null = projection.fromLatLngToPoint(this.props.coordinates)
+        if (loc === null) {
+            return this.props.coordinates
+        }
+        const newLoc = new window.google.maps.Point(loc.x + (offset.x/(2^(zoom)))/2048, loc.y + (offset.y/(2^(zoom)))/2048)
+        const displacedCoords = projection.fromPointToLatLng(newLoc)
+        if (displacedCoords !== null) {
+            return displacedCoords
+        }
+        return this.props.coordinates
+      }
 
+
+      updateOffsets() {
+        let count = this.props.routers.length
+        for(let i=0; i < count; i++) {
+            this.props.routers[i].coordinates = this.getChildCoords(i,count)
+        }
+      }
 
       render(): React.ReactNode {
-        console.log('Displaying site')
-        const { showPopup } = this.state;
-        const { node, options} = this.props;
-        let explodedNodes: NodeType[] = (this.state.exploded)? node.more: []
-        let anchor
-        let icon
-        if (this.state.exploded) {
-            anchor = new window.google.maps.Point(this.state.r,this.state.r)
-            const cw = this.state.r * 2
-            const ch = cw
-            const cr = this.state.r
-            const svg = '<svg id="some_id" data-name="some_name" xmlns="http://www.w3.org/2000/svg" viewbox ="0 0 '+cw +' '+ch+'" width="'+cw+'" height="'+ch+'"><circle cx="'+cr+'" cy="'+cr+'" r="'+cr+'" fill-opacity="0.3" fill="blue"/></svg>'
-            let icon_url = (this.state.exploded)? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg) : site_icon
-            icon = {
-                url: icon_url,
-                labelOrigin: new window.google.maps.Point(40,90),
-                anchor: anchor,
-
-            }
-        } else {
-            anchor = new window.google.maps.Point(20,50)
-            icon = {
-                url: site_icon,
-                scaledSize: new window.google.maps.Size(80, 80),
-                labelOrigin: new window.google.maps.Point(40,90),
-                anchor: anchor,
-
-            }
-        }
+        console.log('Site render: ' + this.props.routers.length + ' expanded: ' + this.props.expanded)
+        this.updateOffsets()
 
         return (
             <>
-            <Marker 
-                position={node.coordinates} 
-                icon={icon}
-                label={(this.state.showTitles && ! this.state.exploded)? this.getTitleLabel(node):''} 
-                onMouseOver = {this.handleMouseOver}
-                onMouseOut  = {this.handleMouseOut}
-                onClick     = {this.handleClick}
+            {!this.props.expanded && 
+            <AdvancedMarker 
+                position={this.props.coordinates}
+                onClick={this.handleClick}
             >
-                {showPopup && node.details?  (
-                    <InfoWindow>
-                        <h5>{node.details}</h5>
+                <img src={site_icon} width={80} height={80} style={{position: 'relative', top: 30, left: 0}}/>
+                {this.state.showPopup? (
+                    <InfoWindow headerContent={<h5>{this.props.title}</h5>} position={this.props.coordinates} pixelOffset={[0,-20]}>
+                        <h5>{this.props.details}</h5>
                     </InfoWindow>
                 ): <></>}
-            </Marker>
-
-            {
-                explodedNodes.map((child, index, children) => 
-                <>
-                    <Router key={child.name} node={child} offset={this.getChildCoords(index, children.length)} options={options} />
-                </>
-                )
-            }
+            </AdvancedMarker>}
+            { this.props.expanded && <Circle fillOpacity={0.15} fillColor={BLUE} strokeColor={BLUE} strokeOpacity={0.5} strokeWeight={1} onClick={this.handleClick} center={this.props.coordinates} radius={5*this.state.r}/>}
+            { this.props.expanded && this.props.routers.map((router, index) => <Router key={index} {...router} /> ) }
             </>
         )
+
     }
 }
 
