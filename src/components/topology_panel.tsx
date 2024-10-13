@@ -2,21 +2,6 @@ import React, { Component } from 'react';
 import { TopologyPanelProps, TopologyPanelState } from 'types';
 import { APIProvider, Map } from '@vis.gl/react-google-maps'
 import Topology from 'components/Topology';
-// import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
-
-// const styles =   
-// [  
-//      { 
-//         featureType: "poi.business", 
-//         stylers: [{ visibility: "off", }], 
-//       },
-//       {
-//         featureType: "transit",
-//         elementType: "labels.icon",
-//         stylers: [{ visibility: "on" }],
-//       },
-// ]
-
 
 
 export class TopologyPanel extends Component<TopologyPanelProps,TopologyPanelState> {  //= React.memo(({ options, data, width, height }) => {
@@ -55,23 +40,6 @@ export class TopologyPanel extends Component<TopologyPanelProps,TopologyPanelSta
           </Map>
       </APIProvider>
     );
-
-  //   if (!this.state.isLoaded) {
-  //     this.loadApi()
-  //     return <div>Error loading maps</div>
-  //   }
-
-  //   console.log('###################################TOPOLOGY PANEL RENDER!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-  //   return  (
-  //       <GoogleMap
-  //         mapContainerStyle={{width: this.props.width, height: this.props.height}}
-  //         onLoad={this.onLoad}
-  //         onUnmount={this.onUnmount}
-  //         options={mapOptions}
-  //     >
-  //       <Topology series={this.props.data.series} options={this.props.options} map={this.state.map}/>
-  //     </GoogleMap>
-  //     );
 
   }
 }

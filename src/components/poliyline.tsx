@@ -6,13 +6,12 @@ import {
     useEffect,
     useImperativeHandle,
     useMemo,
-    useRef
+    useRef,
+    Ref
   } from 'react';
   
   import {GoogleMapsContext, useMapsLibrary} from '@vis.gl/react-google-maps';
-  
-  import type {Ref} from 'react';
-  
+    
   type PolylineEventProps = {
     onClick?: (e: google.maps.MapMouseEvent) => void;
     onDrag?: (e: google.maps.MapMouseEvent) => void;
@@ -90,7 +89,7 @@ import {
       return () => {
         polyline.setMap(null);
       };
-    }, [map]);
+    }, [map, polyline]);
   
     // attach and re-attach event-handlers when any of the properties change
     useEffect(() => {
@@ -126,8 +125,9 @@ import {
   export const Polyline = forwardRef((props: PolylineProps, ref: PolylineRef) => {
     const polyline = usePolyline(props);
   
-    useImperativeHandle(ref, () => polyline, []);
+    useImperativeHandle(ref, () => polyline, [polyline]);
   
     return null;
   });
   
+  Polyline.displayName = 'Polyline'

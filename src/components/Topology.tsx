@@ -18,9 +18,9 @@ class Topology extends Component<TopologyProps,TopologyState> {
     this.routersChanged = this.routersChanged.bind(this)
     this.getNodes(this.props.series);
     this.getLinks(this.props.series);
-    console.log('Router count: ' + this.routers.length)
-    console.log('Site count: ' + this.sites.length + ' containing ' + this.sites[0].routers.length)
-    console.log('Link count: ' + this.links.length)
+    // console.log('Router count: ' + this.routers.length)
+    // console.log('Site count: ' + this.sites.length + ' containing ' + this.sites[0].routers.length)
+    // console.log('Link count: ' + this.links.length)
   }
 
   state = {
@@ -84,8 +84,9 @@ class Topology extends Component<TopologyProps,TopologyState> {
           if (existing) {
             if ('routers' in existing) {
               existing.routers.push(router)
+              existing.details +=  ' ' + router.title
             } else {
-              let site: SiteProps = {...router, routers: [router], routersChanged: this.routersChanged}
+              let site: SiteProps = {...router, id: this.sites.length, expanded: false, title: 'Site', details: router.title, routers: [router], routersChanged: this.routersChanged}
               let i = this.routers.indexOf(existing)
               if (index >= 0) {
                 this.routers.splice(i, 1)
@@ -102,9 +103,15 @@ class Topology extends Component<TopologyProps,TopologyState> {
     );
   }
 
-  routersChanged(routers: RouterProps[]) {
-    const links2Rerender = this.links.filter(link => routers.includes(link.source) || routers.includes(link.target)).forEach(link => link.updated = Date.now())
-    console.log('Links to re-render ' + JSON.stringify(links2Rerender))
+  routersChanged(site: SiteProps) {
+    console.log('Routers changed')
+    // TODO This is generating the following error:
+    // RangeError: Maximum call stack size exceeded
+    // at Function.keys (<anonymous>)
+    // this.links.filter(link => site.routers.includes(link.source) || site.routers.includes(link.target)).forEach(link => link.updated = Date.now())
+    const sites = this.sites.filter(mySite => mySite.id === site.id)
+    const mySite = sites[0]
+    mySite.expanded = !mySite.expanded
     this.setState({
       ...this.state,
       updated: Date.now()
@@ -155,7 +162,6 @@ class Topology extends Component<TopologyProps,TopologyState> {
           acc.push( this.getLinkProps(source, target, sourceLoadField, targetLoadField, index))
         } else {
           console.log('Source or Target not found: index: ' + index + '\tvalue: ' + value + '\n\tsource: '+ source + '\n\ttarget: '+target);
-          console.log(sourceField.values[index])
         }
         return acc;
       }, []

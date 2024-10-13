@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import { LinkProps } from 'types';
 import 'css/Link.css'
 import { Polyline } from './poliyline';
+import { InfoWindow } from '@vis.gl/react-google-maps';
 
 
 class Link extends Component<LinkProps> {
 
-    // compute = google.maps.geometry?.spherical
+    compute = google.maps.geometry?.spherical
 
     getColor(position: string): string {
         const value = this.props.load[(position ==='start')?0:1]
@@ -45,7 +46,7 @@ class Link extends Component<LinkProps> {
 
     state = {
         showPopup: false,
-        highlight: false        
+        highlight: false
     }
 
     handleMouseOver = (e: google.maps.MapMouseEvent) => {
@@ -72,29 +73,28 @@ class Link extends Component<LinkProps> {
         return [this.props.source.coordinates, this.props.target.coordinates]
     }
 
-    // calculatePoputLoc() {
-    //     const srcCoords = this.props.link.source.getCoordinates()
-    //     const targetCoords = this.props.link.target.getCoordinates()
-    //     const distance = this.compute.computeDistanceBetween(srcCoords, targetCoords)
-    //     const offset = distance * 0.5
-    //     const heading = this.compute.computeHeading(srcCoords, targetCoords)
-    //     return this.compute.computeOffset(srcCoords, offset, heading)
-    // }
+    calculatePoputLoc() {
+        const srcCoords = this.props.source.coordinates
+        const targetCoords = this.props.target.coordinates
+        const distance = this.compute.computeDistanceBetween(srcCoords, targetCoords)
+        const offset = distance * 0.5
+        const heading = this.compute.computeHeading(srcCoords, targetCoords)
+        return this.compute.computeOffset(srcCoords, offset, heading)
+    }
 
     render(): React.ReactNode {
         console.log('Link render')
         const options = this.props.options
         // console.log("Path " + JSON.stringify(this.getCoordinates()))
-        console.log("weight: " + options.linkWeight + " geodesic " + options.linkGeodesic + " opacity " + options.linkOpacity)
-        return <div>
-            {/* { this.state.showPopup && this.props.link.load[0] > 0? 
-            <InfoWindow position={this.calculatePoputLoc()}>
+        // console.log("weight: " + options.linkWeight + " geodesic " + options.linkGeodesic + " opacity " + options.linkOpacity)
+        return <>
+            { this.state.showPopup && (this.props.load[0] > 0)? 
+            <InfoWindow headerContent={<h5>{this.getTitle()}</h5>} position={this.calculatePoputLoc()}>
                 <div>
-                    <h5>{this.getTitle()}</h5>
-                    <h6>{this.props.link.source.props.title} load {this.props.link.load[0]}</h6>
-                    <h6>{this.props.link.target.props.title} load {this.props.link.load[1]}</h6>
+                    <h6>{this.props.source.title} load {this.props.load[0]}</h6>
+                    <h6>{this.props.target.title} load {this.props.load[1]}</h6>
                 </div>
-            </InfoWindow> : <></>} */}
+            </InfoWindow> : <></>}
             <Polyline path={this.getCoordinates()}
                     visible={options.showLinks}
                     icons={this.getIcons()}
@@ -107,7 +107,7 @@ class Link extends Component<LinkProps> {
                     onMouseOut  = {this.handleMouseOut}
                     onClick     = {this.handleClick}
             /> 
-        </div>
+        </>
     }
 }
 

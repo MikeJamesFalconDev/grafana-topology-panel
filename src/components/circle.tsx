@@ -3,10 +3,10 @@ import {
     useContext,
     useEffect,
     useImperativeHandle,
-    useRef
+    useRef,
+    Ref
   } from 'react';
   
-  import type {Ref} from 'react';
   import {GoogleMapsContext, latLngEquals} from '@vis.gl/react-google-maps';
   
   type CircleEventProps = {
@@ -60,12 +60,12 @@ import {
     useEffect(() => {
       if (!center) {return};
       if (!latLngEquals(center, circle.getCenter())) {circle.setCenter(center)};
-    }, [center]);
+    }, [center, circle]);
   
     useEffect(() => {
       if (radius === undefined || radius === null) {return};
       if (radius !== circle.getRadius()) {circle.setRadius(radius)};
-    }, [radius]);
+    }, [radius, circle]);
   
     const map = useContext(GoogleMapsContext)?.map;
   
@@ -83,7 +83,7 @@ import {
       return () => {
         circle.setMap(null);
       };
-    }, [map]);
+    }, [map, circle]);
   
     // attach and re-attach event-handlers when any of the properties change
     useEffect(() => {
@@ -132,3 +132,4 @@ import {
     return null;
   });
   
+  Circle.displayName = 'Circle'

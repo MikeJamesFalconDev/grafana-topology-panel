@@ -20,13 +20,6 @@ export interface TopologyOptions {
   showNodeTitles: boolean,
 }
 
-// export type EdgeType = {
-//   name: string
-//   source: Router,
-//   target: Router,
-//   load: number[]
-// }
-
 export interface TopologyPanelProps extends PanelProps<TopologyOptions> {
   options:  TopologyOptions
   data:     PanelData
@@ -57,10 +50,10 @@ export interface RouterProps {
 }
 
 export interface SiteProps extends RouterProps {
-  // addRouters: (routers: Router[]) => void
-  // removeRouters: (routers: Router[]) => void
+  id: number
   routers: RouterProps[]
-  routersChanged: (routerProps: RouterProps[]) => void
+  expanded: boolean
+  routersChanged: (site: SiteProps) => void
 }
 
 
@@ -71,6 +64,11 @@ export interface LinkProps {
   load: number[]
   options: TopologyOptions
   updated: number
+}
+
+export interface LinkState {
+  showPopup: boolean,
+  highlight: boolean
 }
 
 

@@ -13,14 +13,12 @@ class Router extends Component<RouterProps> {
     state = {
         showPopup: false,
         highlight: false,
-        showTitles: false,
     }
 
     handleMouseOver = (e: Event | MouseEvent | TouchEvent | PointerEvent | KeyboardEvent) => {
         this.setState({
             showPopup: true,
             highlight: true,
-            showTitles: true
         })
     };
 
@@ -28,7 +26,6 @@ class Router extends Component<RouterProps> {
         this.setState({
             showPopup: false,
             highlight: false,
-            showTitles:false
         })
     };
 
@@ -37,7 +34,6 @@ class Router extends Component<RouterProps> {
             return
         }
         const url = this.props.options.nodeClickUrl.replace('{name}', this.props.name).replace('{title}', this.props.title);
-        console.log(`Url ${url}`)
         const win = window.open(url, '_blank')
         if (win) { 
             win.focus();
@@ -56,31 +52,6 @@ class Router extends Component<RouterProps> {
 
       render(): React.ReactNode {
         console.log('Router render ' + this.props.name)
-        const { showPopup } = this.state;
-
-        // return (
-        //     <>
-        //     <Marker 
-        //         position={this.getCoordinates()} 
-        //         icon={{
-        //             url:router_icon, 
-        //             scaledSize: new window.google.maps.Size(40, 20), 
-        //             labelOrigin: new window.google.maps.Point(20,30),
-        //             anchor: new window.google.maps.Point(20,10),
-        //         }}
-        //         label={(this.state.showTitles)? this.getTitleLabel(this.props.title):''} 
-        //         onMouseOver = {this.handleMouseOver}
-        //         onMouseOut  = {this.handleMouseOut}
-        //         onClick     = {this.handleClick}
-        //     >
-        //         {showPopup && this.props.details?  (
-        //             <InfoWindow>
-        //                 <h5>{this.props.details}</h5>
-        //             </InfoWindow>
-        //         ): <></>}
-        //     </Marker>
-        //     </>
-        // )
         return (
             <AdvancedMarker 
                 position={this.props.coordinates}
@@ -89,9 +60,9 @@ class Router extends Component<RouterProps> {
                 onClick={this.handleClick}
             >
                 <img src={router_icon} width={32} height={32} style={{position: 'relative', top: 15, left: 0}} />
-                {showPopup ?  (
-                    <InfoWindow>
-                        <h5>{this.props.title}</h5>
+                {this.state.showPopup?  (
+                    <InfoWindow headerContent={<h5>{this.props.title}</h5>} position={this.props.coordinates} pixelOffset={[0,-20]}>
+                        {this.props.details}
                     </InfoWindow>
                 ): <></>}
             </AdvancedMarker>
