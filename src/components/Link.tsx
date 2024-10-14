@@ -85,8 +85,6 @@ class Link extends Component<LinkProps> {
     render(): React.ReactNode {
         console.log('Link render')
         const options = this.props.options
-        // console.log("Path " + JSON.stringify(this.getCoordinates()))
-        // console.log("weight: " + options.linkWeight + " geodesic " + options.linkGeodesic + " opacity " + options.linkOpacity)
         return <>
             { this.state.showPopup && (this.props.load[0] > 0)? 
             <InfoWindow headerContent={<h5>{this.getTitle()}</h5>} position={this.calculatePoputLoc()}>

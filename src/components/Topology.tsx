@@ -12,15 +12,11 @@ class Topology extends Component<TopologyProps,TopologyState> {
   static contextType = GoogleMapsContext;
   context!: React.ContextType<typeof GoogleMapsContext>;
 
-
   constructor(props: TopologyProps) {
     super(props)
     this.routersChanged = this.routersChanged.bind(this)
     this.getNodes(this.props.series);
     this.getLinks(this.props.series);
-    // console.log('Router count: ' + this.routers.length)
-    // console.log('Site count: ' + this.sites.length + ' containing ' + this.sites[0].routers.length)
-    // console.log('Link count: ' + this.links.length)
   }
 
   state = {
@@ -30,7 +26,6 @@ class Topology extends Component<TopologyProps,TopologyState> {
   routers:  RouterProps[]  = []
   sites:    SiteProps[]    = []
   links:    LinkProps[]    = []
-
   
   private getField(frame: DataFrame, name: string) {
     return frame.fields.find((field) => field.name === name)
@@ -104,11 +99,6 @@ class Topology extends Component<TopologyProps,TopologyState> {
   }
 
   routersChanged(site: SiteProps) {
-    console.log('Routers changed')
-    // TODO This is generating the following error:
-    // RangeError: Maximum call stack size exceeded
-    // at Function.keys (<anonymous>)
-    // this.links.filter(link => site.routers.includes(link.source) || site.routers.includes(link.target)).forEach(link => link.updated = Date.now())
     const sites = this.sites.filter(mySite => mySite.id === site.id)
     const mySite = sites[0]
     mySite.expanded = !mySite.expanded
