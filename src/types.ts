@@ -9,6 +9,7 @@ export interface TopologyOptions {
   googleMapsApiKey: string,
   nodeClickUrl: string,
   nodeIconSize: google.maps.Size // Not implemented
+  siteCircleMultiplier: number
   showLinks: boolean,
   showLinkUsage: boolean,
   linkColor: string,
@@ -42,7 +43,7 @@ export interface TopologyState {
 
 
 export interface RouterProps {
-  name: string,
+  id: string,
   title: string,
   details: string,
   coordinates: google.maps.LatLng,
@@ -50,7 +51,7 @@ export interface RouterProps {
 }
 
 export interface SiteProps extends RouterProps {
-  id: number
+  siteId: number
   routers: RouterProps[]
   expanded: boolean
   routersChanged: (site: SiteProps) => void

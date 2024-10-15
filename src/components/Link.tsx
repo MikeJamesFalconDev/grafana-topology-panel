@@ -7,7 +7,7 @@ import { InfoWindow } from '@vis.gl/react-google-maps';
 
 class Link extends Component<LinkProps> {
 
-    compute = google.maps.geometry?.spherical
+    compute = google.maps.geometry.spherical
 
     getColor(position: string): string {
         const value = this.props.load[(position ==='start')?0:1]
@@ -83,10 +83,10 @@ class Link extends Component<LinkProps> {
     }
 
     render(): React.ReactNode {
-        console.log('Link render')
-        const options = this.props.options
+        console.log('Link render ')
+
         return <>
-            { this.state.showPopup && (this.props.load[0] > 0)? 
+            { this.state.showPopup?
             <InfoWindow headerContent={<h5>{this.getTitle()}</h5>} position={this.calculatePoputLoc()}>
                 <div>
                     <h6>{this.props.source.title} load {this.props.load[0]}</h6>
@@ -94,13 +94,13 @@ class Link extends Component<LinkProps> {
                 </div>
             </InfoWindow> : <></>}
             <Polyline path={this.getCoordinates()}
-                    visible={options.showLinks}
+                    visible={this.props.options.showLinks}
                     icons={this.getIcons()}
-                    geodesic={options.linkGeodesic}
+                    geodesic={this.props.options.linkGeodesic}
                     editable={false}
-                    strokeColor={(this.state.highlight)?'grey':'dark grey'}
-                    strokeWeight={options.linkWeight}
-                    strokeOpacity={options.linkOpacity}
+                    strokeColor={(this.state.highlight)?'grey':this.props.options.linkColor}
+                    strokeWeight={this.props.options.linkWeight}
+                    strokeOpacity={this.props.options.linkOpacity}
                     onMouseOver = {this.handleMouseOver}
                     onMouseOut  = {this.handleMouseOut}
                     onClick     = {this.handleClick}

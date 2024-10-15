@@ -13,8 +13,9 @@ class Site extends Component<SiteProps> {
     state = {
         showPopup: false,
         highlight: false,
-        r: 100
     }
+
+    circleR = 1
 
     handleClick = (e: google.maps.MapMouseEvent) => {
         console.log('handleClick start')
@@ -31,38 +32,23 @@ class Site extends Component<SiteProps> {
         }
       }
     
-      getChildCoords(index: number, count: number): google.maps.LatLng {
+      getChildCoords(index: number, count: number, projection: google.maps.Projection, zoom: number, loc: google.maps.Point): google.maps.LatLng {
         if (this.props.expanded === false) {
             return this.props.coordinates
         }
 
-        const r = 100
+        const r = this.props.options.siteCircleMultiplier
         const alfa = 2 * Math.PI / count
         let offset: Offset = {
             x: r * Math.sin(alfa * index),
             y: r * Math.cos(alfa * index)
           }
-          return this.getCoordinates(offset)
+          return this.getCoordinates(offset, projection, zoom, loc)
       }
 
-      getCoordinates(offset: Offset): google.maps.LatLng {
-        if (!this.context) {
-            return this.props.coordinates
-        }
-        const {map} = this.context!
-        const zoom: number| undefined = map?.getZoom()
-        const projection: google.maps.Projection | undefined = map?.getProjection()
-        if (!map) {
-            return this.props.coordinates
-        }
-        if (!projection || !zoom) {
-            return this.props.coordinates
-        }
-        let loc: google.maps.Point | null = projection.fromLatLngToPoint(this.props.coordinates)
-        if (loc === null) {
-            return this.props.coordinates
-        }
-        const newLoc = new window.google.maps.Point(loc.x + (offset.x/(2^(zoom)))/2048, loc.y + (offset.y/(2^(zoom)))/2048)
+      getCoordinates(offset: Offset, projection: google.maps.Projection, zoom: number, loc: google.maps.Point): google.maps.LatLng {
+        const newLoc = new window.google.maps.Point(loc.x + (offset.x*(2^(zoom)))/2048, loc.y + (offset.y*(2^(zoom)))/2048)
+        // const newLoc = new window.google.maps.Point(loc.x + offset.x, loc.y + offset.y)
         const displacedCoords = projection.fromPointToLatLng(newLoc)
         if (displacedCoords !== null) {
             return displacedCoords
@@ -72,10 +58,17 @@ class Site extends Component<SiteProps> {
 
 
       updateOffsets() {
-        let count = this.props.routers.length
-        for(let i=0; i < count; i++) {
-            this.props.routers[i].coordinates = this.getChildCoords(i,count)
+        const {map} = this.context!
+        const zoom: number| undefined = map?.getZoom()
+        const projection: google.maps.Projection | undefined = map?.getProjection()
+        const loc: google.maps.Point | null | undefined = projection?.fromLatLngToPoint(this.props.coordinates)
+        if (!map || !projection || !zoom || !loc) {
+            this.props.routers.forEach((router) => router.coordinates = this.props.coordinates)
+            return
         }
+        console.log('Zoom: ' + zoom)
+        this.circleR = this.props.options.siteCircleMultiplier*70*(2^(zoom))
+        this.props.routers.forEach((router, index, routers) => router.coordinates = this.getChildCoords(index,routers.length, projection, zoom, loc))
       }
 
       render(): React.ReactNode {
@@ -96,7 +89,7 @@ class Site extends Component<SiteProps> {
                     </InfoWindow>
                 ): <></>}
             </AdvancedMarker>}
-            { this.props.expanded && <Circle fillOpacity={0.15} fillColor={BLUE} strokeColor={BLUE} strokeOpacity={0.5} strokeWeight={1} onClick={this.handleClick} center={this.props.coordinates} radius={5*this.state.r}/>}
+            { this.props.expanded && <Circle fillOpacity={0.15} fillColor={BLUE} strokeColor={BLUE} strokeOpacity={0.5} strokeWeight={1} onClick={this.handleClick} center={this.props.coordinates} radius={this.circleR}/>}
             { this.props.expanded && this.props.routers.map((router, index) => <Router key={index} {...router} /> ) }
             </>
         )

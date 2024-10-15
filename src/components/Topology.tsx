@@ -11,6 +11,7 @@ import { GoogleMapsContext } from '@vis.gl/react-google-maps';
 class Topology extends Component<TopologyProps,TopologyState> {
   static contextType = GoogleMapsContext;
   context!: React.ContextType<typeof GoogleMapsContext>;
+  isBoundsSet = false
 
   constructor(props: TopologyProps) {
     super(props)
@@ -38,7 +39,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
       }
     )
     let props: RouterProps = {
-      name: idField.values[index],
+      id: idField.values[index],
       title: titleField.values[index],
       details: (detailsField)? detailsField.values[index] : '',
       coordinates: coordinates,
@@ -81,7 +82,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
               existing.routers.push(router)
               existing.details +=  ' ' + router.title
             } else {
-              let site: SiteProps = {...router, id: this.sites.length, expanded: false, title: 'Site', details: router.title, routers: [router], routersChanged: this.routersChanged}
+              let site: SiteProps = {...existing, siteId: this.sites.length, expanded: false, title: 'Site', details: router.title, routers: [existing, router], routersChanged: this.routersChanged}
               let i = this.routers.indexOf(existing)
               if (index >= 0) {
                 this.routers.splice(i, 1)
@@ -99,7 +100,7 @@ class Topology extends Component<TopologyProps,TopologyState> {
   }
 
   routersChanged(site: SiteProps) {
-    const sites = this.sites.filter(mySite => mySite.id === site.id)
+    const sites = this.sites.filter(mySite => mySite.siteId === site.siteId)
     const mySite = sites[0]
     mySite.expanded = !mySite.expanded
     this.setState({
@@ -108,12 +109,17 @@ class Topology extends Component<TopologyProps,TopologyState> {
     })
   }
 
-  private findNode(name: String): RouterProps | undefined {
-    let node = this.routers.find((curr)=> curr.name === name);
+  private findNode(id: String): RouterProps | undefined {
+    let node = this.routers.find((curr)=> curr.id === id);
     if (!node) {
-      this.sites.forEach((current) => node = current.routers.find((curr)=> curr.name === name))
+      for(let i=0; !node && i < this.sites.length; i++) {
+        node = this.sites[i].routers.find((curr)=> curr.id === id)
+      }
     }
-    return node
+    if (!node) {
+      console.log('Node not found: ' + id)
+    }
+      return node
   }
 
   private getLinkProps(source: RouterProps, target: RouterProps, sourceLoadField: Field | undefined, targetLoadField: Field | undefined, index: number): LinkProps {
@@ -158,15 +164,30 @@ class Topology extends Component<TopologyProps,TopologyState> {
     );
   }
 
-  render(): React.ReactNode {
-    console.log('Topology render')
+  setBounds() {
+    if (this.isBoundsSet) {
+      console.log('Bounds already set')
+      return
+    }
+    if (!this.context) {
+      console.log('No context')
+      return
+    }
     const {map} = this.context!
     if (map != null) {
       const bounds = new window.google.maps.LatLngBounds();
       Object.values(this.routers).map((router)=> bounds.extend(router.coordinates));
       Object.values(this.sites).map((site)=> bounds.extend(site.coordinates));
       map.fitBounds(bounds);
+      this.isBoundsSet = true
+    } else {
+      console.log('No map')
     }
+  }
+
+  render(): React.ReactNode {
+    console.log('Topology render')
+    this.setBounds()
     return (
       <>
       { this.routers.map((router,index)   => <Router key={index} {...router} /> ) }

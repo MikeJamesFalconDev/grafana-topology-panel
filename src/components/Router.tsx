@@ -33,7 +33,7 @@ class Router extends Component<RouterProps> {
         if (!this.props.options.nodeClickUrl) {
             return
         }
-        const url = this.props.options.nodeClickUrl.replace('{name}', this.props.name).replace('{title}', this.props.title);
+        const url = this.props.options.nodeClickUrl.replace('{name}', this.props.id).replace('{title}', this.props.title);
         const win = window.open(url, '_blank')
         if (win) { 
             win.focus();
@@ -51,7 +51,7 @@ class Router extends Component<RouterProps> {
 
 
       render(): React.ReactNode {
-        console.log('Router render ' + this.props.name)
+        console.log('Router render ' + this.props.id)
         return (
             <AdvancedMarker 
                 position={this.props.coordinates}

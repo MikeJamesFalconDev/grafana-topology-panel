@@ -28,6 +28,12 @@ export const plugin = new PanelPlugin<TopologyOptions>(TopologyPanel).setPanelOp
     })
     .addNumberInput({
       category: ['General'],
+      path: 'siteCircleMultiplier',
+      name: 'Site Circle Multiplier. Size of the circle shown when a site is expanded',
+      defaultValue: 7,
+    })
+    .addNumberInput({
+      category: ['General'],
       path: 'linkWeight',
       name: 'Link Weight',
       defaultValue: 3,

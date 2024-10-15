@@ -26,6 +26,7 @@ export class TopologyPanel extends Component<TopologyPanelProps,TopologyPanelSta
     }
 
     return (
+      this.props.options.googleMapsApiKey?
       <APIProvider 
           apiKey={this.props.options.googleMapsApiKey} 
           libraries={["geometry"]}
@@ -38,7 +39,7 @@ export class TopologyPanel extends Component<TopologyPanelProps,TopologyPanelSta
           >
             <Topology series={this.props.data.series} options={this.props.options} /> 
           </Map>
-      </APIProvider>
+      </APIProvider>:<div><h1>Please configure Google API key</h1></div>
     );
 
   }
