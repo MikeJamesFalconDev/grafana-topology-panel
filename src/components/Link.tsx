@@ -87,7 +87,7 @@ class Link extends Component<LinkProps> {
 
         return <>
             { this.state.showPopup?
-            <InfoWindow headerContent={<h5>{this.getTitle()}</h5>} position={this.calculatePoputLoc()}>
+            <InfoWindow headerContent={<h5>{this.getTitle()}</h5>} position={this.calculatePoputLoc()} disableAutoPan={true}>
                 <div>
                     <h6>{this.props.source.title} load {this.props.load[0]}</h6>
                     <h6>{this.props.target.title} load {this.props.load[1]}</h6>
