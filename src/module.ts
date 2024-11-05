@@ -16,6 +16,18 @@ export const plugin = new PanelPlugin<TopologyOptions>(TopologyPanel).setPanelOp
       name: 'Link Usage',
       defaultValue: true,
     })
+    .addNumberInput({
+      category: [ "Icons"],
+      path: 'routerIconSize',
+      name: 'Router Icon Size',
+      defaultValue: 32
+    })
+    .addNumberInput({
+      category: [ "Icons"],
+      path: 'siteIconSize',
+      name: 'Site Icon Size',
+      defaultValue: 80
+    })
     .addTextInput({
       category: [ "Google Maps"],
       path: 'googleMapsApiKey',

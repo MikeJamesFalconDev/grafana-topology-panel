@@ -82,7 +82,7 @@ class Site extends Component<SiteProps> {
                 position={this.props.coordinates}
                 onClick={this.handleClick}
             >
-                <img src={site_icon} width={80} height={80} style={{position: 'relative', top: 30, left: 0}}/>
+                <img src={site_icon} width={this.props.options.siteIconSize} height={this.props.options.siteIconSize} style={{position: 'relative', top: this.props.options.siteIconSize/2, left: 0}}/>
                 {this.state.showPopup? (
                     <InfoWindow headerContent={<h5>{this.props.title}</h5>} position={this.props.coordinates} pixelOffset={[0,-20]}>
                         <h5>{this.props.details}</h5>

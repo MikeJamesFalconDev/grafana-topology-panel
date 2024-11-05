@@ -19,6 +19,8 @@ export interface TopologyOptions {
   linkLight: LightColorThreshold[],
   linkLightDefault: string,
   showNodeTitles: boolean,
+  routerIconSize: number,
+  siteIconSize: number,
 }
 
 export interface TopologyPanelProps extends PanelProps<TopologyOptions> {

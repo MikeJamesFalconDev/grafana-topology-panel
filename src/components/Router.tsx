@@ -59,7 +59,7 @@ class Router extends Component<RouterProps> {
                 onMouseLeave={this.handleMouseOut}
                 onClick={this.handleClick}
             >
-                <img src={router_icon} width={32} height={32} style={{position: 'relative', top: 15, left: 0}} />
+                <img src={router_icon} width={this.props.options.routerIconSize} height={this.props.options.routerIconSize} style={{position: 'relative', top: this.props.options.routerIconSize/2, left: 0}} />
                 {this.state.showPopup?  (
                     <InfoWindow headerContent={<h5>{this.props.title}</h5>} position={this.props.coordinates} pixelOffset={[0,-20]}>
                         {this.props.details}
